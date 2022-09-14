@@ -227,7 +227,7 @@ async def getImgsByDay(days):
         imgs = set(re.findall('\<a href\=\"\/artworks\/(.*?)\"', text))
         return list(imgs)
 
-pixivRank = on_regex(pattern="^[pixivRank\ |pixivrank\ ]")
+pixivRank = on_regex(pattern="^(?i)pixivRank\ ")
 
 @pixivRank.handle()
 async def pixiv_rev(bot: Bot, event: Event):
@@ -261,6 +261,8 @@ async def send_group_imgs(bot: Bot, event: Event, imgs):
                     if size // 1024 // 1024 >= 10:
                         await yasuo(path)
                     msg += MessageSegment.image(await base64_path(path))
+                name = name[0].split('_')[0]
+                msg += MessageSegment.text(f"https://www.pixiv.net/i/{name}")
         try:
             if isinstance(event, GroupMessageEvent):
                 await send_forward_msg_group(bot, event, 'qqbot', msg)
@@ -279,9 +281,9 @@ async def pixiv_tag_handler(bot : Bot, event: Event):
         manyUsers = ''
         msg_plain_text.pop(1)
     else:
-        manyUsers = ' 1000'
+        manyUsers = ' (1000 OR 2000 OR 5000)'
     tag_plain_text = msg_plain_text[1]
-    print(msg_plain_text[0], manyUsers, tag_plain_text)
+    print(f"正在搜索：{msg_plain_text[0]} {tag_plain_text}{manyUsers}")
     url = "https://www.pixiv.net/ajax/search/artworks/"+tag_plain_text+manyUsers+'?word='+tag_plain_text+manyUsers
     if pixiv_r18:
         url = url + '&order=date_d&p=1&s_mode=s_tag&type=all&lang=zh'
