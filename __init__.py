@@ -241,53 +241,16 @@ async def pixiv_rev(bot: Bot, event: Event):
     }
     if info in dic.keys():
         imgs = random.choices(await getImgsByDay(dic[info]), k=5)
-        names = []
-        for img in imgs:
-            names.append(await main(img))
-        if not names:
-            await bot.send(event=event, message="发生了异常情况")
-        else:
-            msg = None
-            for name in names:
-                if name:
-                    for t in name:
-                        path = f"{imgRoot}QQbotFiles/pixiv/{t}"
-                        size = os.path.getsize(path)
-                        if size // 1024 // 1024 >= 10:
-                            await yasuo(path)
-                        msg += MessageSegment.image(await base64_path(path))
-            try:
-                if isinstance(event, GroupMessageEvent):
-                    await send_forward_msg_group(bot, event, 'qqbot', msg)
-                else:
-                    await bot.send(event=event, message=msg)
-            except:
-                await bot.send(event=event, message="查询失败, 帐号有可能发生风控，请检查")
+        await send_group_imgs(bot, event, imgs)
     else:
         await bot.send(event=event, message=Message("参数错误\n样例: 'pixivRank 1' , 1:day,7:weekly,30:monthly"))
 
-
-pixivTag= on_regex(pattern="^pixivTag\ ")
-
-@pixivTag.handle()
-async def pixiv_tag_handler(bot : Bot, event: Event):
-    tag_plain_text = str(event.message).strip()[8:].strip()
-    manyUsers = ' 1000'
-    url = "https://www.pixiv.net/ajax/search/artworks/"+tag_plain_text+manyUsers+'?word='+tag_plain_text+manyUsers
-    if pixiv_r18:
-        url = url + '&order=date_d&p=1&s_mode=s_tag&type=all&lang=zh'
-    else:
-        url = url + '&order=date_d&mode=safe&p=1&s_mode=s_tag&type=all&lang=zh'
-    imgs = await getImgByTag(url)
-    if imgs:
-        imgs = random.choices(imgs, k=6)
-    else:
-        await pixivTag.finish("没有搜到作品哦")
+async def send_group_imgs(bot: Bot, event: Event, imgs):
     names = []
     for img in imgs:
         names.append(await main(img))
     if not names:
-        await pixivTag.finish("发生了异常情况")
+        await bot.send(event=event, message="发生了异常情况")
     else:
         msg = None
         for name in names:
@@ -307,13 +270,39 @@ async def pixiv_tag_handler(bot : Bot, event: Event):
             await bot.send(event=event, message="查询失败, 帐号有可能发生风控，请检查")
 
 
+pixivTag= on_regex(pattern="^(?i)[pixivTag|pixivtag5]")
+
+@pixivTag.handle()
+async def pixiv_tag_handler(bot : Bot, event: Event):
+    msg_plain_text = str(event.message).split(' ', 2)
+    if msg_plain_text[1] == 'all':
+        manyUsers = ''
+        msg_plain_text.pop(1)
+    else:
+        manyUsers = ' 1000'
+    tag_plain_text = msg_plain_text[1]
+    print(msg_plain_text[0], manyUsers, tag_plain_text)
+    url = "https://www.pixiv.net/ajax/search/artworks/"+tag_plain_text+manyUsers+'?word='+tag_plain_text+manyUsers
+    if pixiv_r18:
+        url = url + '&order=date_d&p=1&s_mode=s_tag&type=all&lang=zh'
+    else:
+        url = url + '&order=date_d&mode=safe&p=1&s_mode=s_tag&type=all&lang=zh'
+    img_set = await getImgByTag(url)
+    if img_set:
+        if msg_plain_text[0] in ["pixivTag", "pixivtag"]:
+            imgs = random.choices(img_set, k=1)
+        elif msg_plain_text[0] in ["pixivTag5", "pixivtag5"]:
+            imgs = random.choices(img_set, k=5)
+        await send_group_imgs(bot, event, imgs)
+    else:
+        await pixivTag.finish("没有搜到作品哦")
 
 
 async def getImgByTag(url):
     async with aiohttp.ClientSession() as session:
         async with session.get(url=url, headers=headersCook, proxy=proxy_aiohttp) as resp:
             content = await resp.content.read()
-            imgs = set(re.findall('"id":"([0-9]*)",', content.decode()))
+            imgs = set(re.findall('"id":"([0-9]+)",', content.decode()))
             return list(imgs)
     
 
