@@ -292,9 +292,9 @@ async def pixiv_tag_handler(bot : Bot, event: Event):
     img_set = await getImgByTag(url)
     if img_set:
         if msg_plain_text[0] in ["pixivTag", "pixivtag"]:
-            imgs = random.choices(img_set, k=1)
+            imgs = random.sample(img_set, k=1)
         elif msg_plain_text[0] in ["pixivTag5", "pixivtag5"]:
-            imgs = random.choices(img_set, k=5)
+            imgs = random.sample(img_set, k=5)
         await send_group_imgs(bot, event, imgs)
     else:
         await pixivTag.finish("没有搜到作品哦")
