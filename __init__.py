@@ -227,7 +227,7 @@ async def getImgsByDay(days):
         imgs = set(re.findall('\<a href\=\"\/artworks\/(.*?)\"', text))
         return list(imgs)
 
-pixivRank = on_regex(pattern="^[pixivRank\ |pixivrank\ ]")
+pixivRank = on_regex(pattern="^(?i)pixivRank\ ")
 
 @pixivRank.handle()
 async def pixiv_rev(bot: Bot, event: Event):
