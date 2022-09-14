@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import List
 from nonebot import run
 from nonebot.rule import Rule
-from nonebot.plugin import on_message, on_regex
+from nonebot.plugin import on_message, on_regex, on_command
 from nonebot.adapters.onebot.v11 import Bot, Event, Message, MessageSegment, GroupMessageEvent
 import aiohttp
 import re
@@ -152,7 +152,7 @@ async def pixivURL(bot: Bot, event: Event):
 # async def twiSend(names, event: Event, bot: Bot):
 #     return
 
-pixiv = on_regex(pattern="^pixiv\ ")
+pixiv = on_command(cmd="pixiv",aliases=set(['Pixiv', 'pid']))
 
 
 @pixiv.handle()
@@ -227,13 +227,13 @@ async def getImgsByDay(days):
         imgs = set(re.findall('\<a href\=\"\/artworks\/(.*?)\"', text))
         return list(imgs)
 
-pixivRank = on_regex(pattern="^(?i)pixivRank\ ")
+pixivRank = on_command(cmd='pixivrank', aliases='pixivRank')
 
 @pixivRank.handle()
 async def pixiv_rev(bot: Bot, event: Event):
     if not await checkConfig(bot, event):
         return
-    info = str(event.message).strip()[10:].strip()
+    info = str(event.message).split(' ')[1]
     dic = {
         "1": "day",
         "7": "weekly",
@@ -272,7 +272,7 @@ async def send_group_imgs(bot: Bot, event: Event, imgs):
             await bot.send(event=event, message="查询失败, 帐号有可能发生风控，请检查")
 
 
-pixivTag= on_regex(pattern="^(?i)[pixivTag|pixivtag5]")
+pixivTag = on_command(cmd='pixivtag',aliases=set(['pixivTag', 'pixivtag5', 'pixivTag5']))
 
 @pixivTag.handle()
 async def pixiv_tag_handler(bot : Bot, event: Event):
@@ -289,12 +289,13 @@ async def pixiv_tag_handler(bot : Bot, event: Event):
         url = url + '&order=date_d&p=1&s_mode=s_tag&type=all&lang=zh'
     else:
         url = url + '&order=date_d&mode=safe&p=1&s_mode=s_tag&type=all&lang=zh'
-    img_set = await getImgByTag(url)
-    if img_set:
+    k_sample = 1
+    if imgs:
         if msg_plain_text[0] in ["pixivTag", "pixivtag"]:
-            imgs = random.sample(img_set, k=1)
+            k_sample = 1            
         elif msg_plain_text[0] in ["pixivTag5", "pixivtag5"]:
-            imgs = random.sample(img_set, k=5)
+            k_sample = 5
+        imgs = random.sample(await getImgByTag(url), k=k_sample)
         await send_group_imgs(bot, event, imgs)
     else:
         await pixivTag.finish("没有搜到作品哦")
@@ -452,7 +453,7 @@ async def isR18(PID):
         else:
             return False
 
-# pixivS = on_regex(pattern="^来点")
+# pixivS = on_command(pattern="^来点")
 
 
 # @pixivS.handle()
