@@ -281,7 +281,7 @@ async def pixiv_tag_handler(bot : Bot, event: Event):
     else:
         manyUsers = ' 1000'
     tag_plain_text = msg_plain_text[1]
-    print(msg_plain_text[0], manyUsers, tag_plain_text)
+    print("正在搜索：{msg_plain_text[0]} {tag_plain_text}{manyUsers}")
     url = "https://www.pixiv.net/ajax/search/artworks/"+tag_plain_text+manyUsers+'?word='+tag_plain_text+manyUsers
     if pixiv_r18:
         url = url + '&order=date_d&p=1&s_mode=s_tag&type=all&lang=zh'
