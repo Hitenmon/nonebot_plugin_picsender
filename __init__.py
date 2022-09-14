@@ -280,6 +280,8 @@ async def pixiv_tag_handler(bot : Bot, event: Event):
         url = url + '&order=date_d&mode=safe&p=1&s_mode=s_tag&type=all&lang=zh'
     imgs = random.choices(await getImgByTag(url), k=2)
     names = []
+    if not imgs:
+        await pixivTag.finish("没有搜到作品哦")
     for img in imgs:
         names.append(await main(img))
     if not names:
