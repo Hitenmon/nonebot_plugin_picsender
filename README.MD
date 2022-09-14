@@ -5,11 +5,20 @@
 
 ### 计划
 - 可以发送推特图片——未实装，正在研究怎么绕过AJAX
+
+- 可以根据tag搜索并发送图片——已实装
+
 ## 使用方法
+
 在/src/plugins文件夹内直接git clone即可
 
 ### 指令
+
 pixiv pid
+
+pixivRank 数字
+
+pixivTag tags
 
 例如：
 
@@ -17,11 +26,13 @@ pixiv 233
 
 pixiv 1000
 
-pixivRank 1 日榜
+pixivRank 1 - 日榜
 
-pixivRank 7 周榜
+pixivRank 7 - 周榜
 
-pixivRank 30 月榜
+pixivRank 30 - 月榜
+
+pixivTag ステンMK-II - 随机获取2张1000users的司登的图
 
 直接发这种链接也能直接识别发送图片
 
