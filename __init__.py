@@ -1,3 +1,4 @@
+from ast import And
 from asyncio import events
 from urllib import response
 from weakref import proxy
@@ -276,25 +277,39 @@ pixivTag = on_command(cmd='pixivtag ',aliases=set(['pixivTag ', 'pixivtag5 ', 'p
 
 @pixivTag.handle()
 async def pixiv_tag_handler(bot : Bot, event: Event):
-    msg_plain_text = str(event.message).split(' ', 2)
-    if msg_plain_text[1] == 'all':
+    msg_plain_text = str(event.message).split(' ')
+    cmd_plain_text = msg_plain_text[0]
+    msg_plain_text.pop(0)
+    if msg_plain_text[0] == 'all':
         manyUsers = ''
         msg_plain_text.pop(1)
     else:
         manyUsers = ' (1000 OR 2000 OR 5000)'
-    tag_plain_text = msg_plain_text[1]
-    print(f"正在搜索：{msg_plain_text[0]} {tag_plain_text}{manyUsers}")
+    page_cmd = re.findall('^p([0-9]+)$',msg_plain_text[0])
+    if page_cmd:
+        page_cmd = page_cmd[0]
+        while page_cmd[0] == '0':
+            page_cmd = page_cmd[1:]
+        msg_plain_text.pop(0)
+    if not page_cmd:
+        page_cmd = '1'
+    tag_plain_text = ' '.join(msg_plain_text)
+    print(f"正在搜索：{cmd_plain_text} p={page_cmd} {tag_plain_text}{manyUsers}")
     url = "https://www.pixiv.net/ajax/search/artworks/"+tag_plain_text+manyUsers+'?word='+tag_plain_text+manyUsers
     if pixiv_r18:
-        url = url + '&order=date_d&p=1&s_mode=s_tag&type=all&lang=zh'
+        url = url + f'&order=date_d&p={page_cmd}&s_mode=s_tag&type=all&lang=zh'
     else:
-        url = url + '&order=date_d&mode=safe&p=1&s_mode=s_tag&type=all&lang=zh'
+        url = url + f'&order=date_d&mode=safe&p={page_cmd}&s_mode=s_tag&type=all&lang=zh'
     k_sample = 1
-    if msg_plain_text[0] in ["pixivTag", "pixivtag"]:
+    if cmd_plain_text in ["pixivTag", "pixivtag"]:
         k_sample = 1            
-    elif msg_plain_text[0] in ["pixivTag5", "pixivtag5"]:
+    elif cmd_plain_text in ["pixivTag5", "pixivtag5"]:
         k_sample = 5
-    imgs = random.sample(await getImgByTag(url), k=k_sample)
+    img_set = await getImgByTag(url)
+    n_imgs = len(img_set)
+    print(f'正在搜索：找到了{n_imgs}个作品，发送其中的{k_sample}个')
+    k_sample = n_imgs if k_sample > n_imgs else k_sample
+    imgs = random.sample(img_set, k=k_sample)
     if imgs:
         await send_group_imgs(bot, event, imgs)
     else:
