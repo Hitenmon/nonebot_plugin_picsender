@@ -152,7 +152,7 @@ async def pixivURL(bot: Bot, event: Event):
 # async def twiSend(names, event: Event, bot: Bot):
 #     return
 
-pixiv = on_command(cmd="pixiv",aliases=set(['Pixiv', 'pid']))
+pixiv = on_command(cmd="pixiv ",aliases=set(['Pixiv ', 'pid ']))
 
 
 @pixiv.handle()
@@ -227,7 +227,7 @@ async def getImgsByDay(days):
         imgs = set(re.findall('\<a href\=\"\/artworks\/(.*?)\"', text))
         return list(imgs)
 
-pixivRank = on_command(cmd='pixivrank', aliases='pixivRank')
+pixivRank = on_command(cmd='pixivrank ', aliases=set(['pixivRank ']))
 
 @pixivRank.handle()
 async def pixiv_rev(bot: Bot, event: Event):
@@ -269,10 +269,10 @@ async def send_group_imgs(bot: Bot, event: Event, imgs):
             else:
                 await bot.send(event=event, message=msg)
         except:
-            await bot.send(event=event, message="查询失败, 帐号有可能发生风控，请检查")
+            await bot.send(event=event, message="发送失败, 帐号有可能发生风控，请检查")
 
 
-pixivTag = on_command(cmd='pixivtag',aliases=set(['pixivTag', 'pixivtag5', 'pixivTag5']))
+pixivTag = on_command(cmd='pixivtag ',aliases=set(['pixivTag ', 'pixivtag5 ', 'pixivTag5 ']))
 
 @pixivTag.handle()
 async def pixiv_tag_handler(bot : Bot, event: Event):
@@ -290,12 +290,12 @@ async def pixiv_tag_handler(bot : Bot, event: Event):
     else:
         url = url + '&order=date_d&mode=safe&p=1&s_mode=s_tag&type=all&lang=zh'
     k_sample = 1
+    if msg_plain_text[0] in ["pixivTag", "pixivtag"]:
+        k_sample = 1            
+    elif msg_plain_text[0] in ["pixivTag5", "pixivtag5"]:
+        k_sample = 5
+    imgs = random.sample(await getImgByTag(url), k=k_sample)
     if imgs:
-        if msg_plain_text[0] in ["pixivTag", "pixivtag"]:
-            k_sample = 1            
-        elif msg_plain_text[0] in ["pixivTag5", "pixivtag5"]:
-            k_sample = 5
-        imgs = random.sample(await getImgByTag(url), k=k_sample)
         await send_group_imgs(bot, event, imgs)
     else:
         await pixivTag.finish("没有搜到作品哦")
