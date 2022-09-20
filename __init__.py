@@ -1,5 +1,6 @@
 from ast import And
 from asyncio import events
+from encodings import search_function
 from urllib import response
 from weakref import proxy
 import nonebot
@@ -48,16 +49,21 @@ if not os.path.exists(pathZipHome):
 
 headersCook = {
     'referer': 'https://www.pixiv.net',
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36 Edg/105.0.1343.42',
+}
+
+search_headers = {
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36 Edg/105.0.1343.42',
 }
 
 twiHeadersCook = {
     'referer': 'https://twitter.com',
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36 Edg/105.0.1343.42',
 }
 
 if pixiv_cookies:
     headersCook['cookie'] = pixiv_cookies
+    search_headers['cookie'] = pixiv_cookies
 if twitter_cookies:
     headersCook['cookie'] = twitter_cookies
 
@@ -294,12 +300,13 @@ async def pixiv_tag_handler(bot : Bot, event: Event):
     if not page_cmd:
         page_cmd = '1'
     tag_plain_text = ' '.join(msg_plain_text)
-    print(f"正在搜索：{cmd_plain_text} p={page_cmd} {tag_plain_text}{manyUsers}")
+    print("正在搜索：{0} p={1} {2}{3}".format(cmd_plain_text, page_cmd, tag_plain_text, manyUsers))
     url = "https://www.pixiv.net/ajax/search/artworks/"+tag_plain_text+manyUsers+'?word='+tag_plain_text+manyUsers
     if pixiv_r18:
         url = url + f'&order=date_d&p={page_cmd}&s_mode=s_tag&type=all&lang=zh'
     else:
         url = url + f'&order=date_d&mode=safe&p={page_cmd}&s_mode=s_tag&type=all&lang=zh'
+    print('访问：{0}'.format(url))
     k_sample = 1
     if cmd_plain_text in ["pixivTag", "pixivtag"]:
         k_sample = 1            
@@ -312,15 +319,17 @@ async def pixiv_tag_handler(bot : Bot, event: Event):
     imgs = random.sample(img_set, k=k_sample)
     if imgs:
         await send_group_imgs(bot, event, imgs)
+        await pixivTag.finish()
     else:
         await pixivTag.finish("没有搜到作品哦")
 
 
 async def getImgByTag(url):
     async with aiohttp.ClientSession() as session:
-        async with session.get(url=url, headers=headersCook, proxy=proxy_aiohttp) as resp:
+        async with session.get(url=url, headers=search_headers, proxy=proxy_aiohttp) as resp:
             content = await resp.content.read()
-            imgs = set(re.findall('"id":"([0-9]+)",', content.decode()))
+            # print(content.decode())
+            imgs = set(re.findall('"id":"([0-9]+)"', content.decode()))
             return list(imgs)
     
 
