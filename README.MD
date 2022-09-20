@@ -1,5 +1,5 @@
 ## 前言
-来自[anlen123](https://github.com/anlen123/nonebot_plugin_pixiv)的项目，精简了/.IDEA和Pypi。
+来自[anlen123](https://github.com/anlen123/nonebot_plugin_pixiv)的项目，精简了/.IDEA和Pypi，增加了一些功能。
 
 这个插件我看到的时候就想到了telegram的发链接显示图的功能，很感兴趣。
 
@@ -7,6 +7,8 @@
 - 可以发送推特图片——未实装，正在研究怎么绕过AJAX
 
 - 可以根据tag搜索并发送图片——已实装
+
+- 可以根据用户发送图片 ——未实装
 
 ## 使用方法
 
@@ -20,7 +22,9 @@ pixivRank 数字
 
 pixivTag tags
 
-例如：
+pixivTag5 tags
+
+大小写均可，例如：
 
 pixiv 233
 
@@ -32,7 +36,11 @@ pixivRank 7 - 周榜
 
 pixivRank 30 - 月榜
 
-pixivTag ステンMK-II - 随机获取2张1000users的司登的图
+pixivTag ステンMK-II - 随机获取1张热门的司登的图
+
+pixivTag5 ステンMK-II - 随机获取5张热门的司登的图
+
+周榜和Tag检索都会发送图片链接
 
 直接发这种链接也能直接识别发送图片
 
