@@ -282,7 +282,7 @@ async def pixiv_tag_handler(bot : Bot, event: Event):
     msg_plain_text.pop(0)
     if msg_plain_text[0] == 'all':
         manyUsers = ''
-        msg_plain_text.pop(1)
+        msg_plain_text.pop(0)
     else:
         manyUsers = ' (1000 OR 2000 OR 5000)'
     page_cmd = re.findall('^p([0-9]+)$',msg_plain_text[0])
